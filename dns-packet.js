@@ -44,7 +44,6 @@ module.exports = class DnsPacket {
    * @returns {DnsHeader}
    */
   get header() {
-    debugger;
     return new DnsHeader(this.bytes.slice(0, DnsHeader.DNS_HEADER_BYTE_LEN));
   }
 

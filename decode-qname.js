@@ -1,10 +1,9 @@
-// The maximum label length is 63.
-// Pointers and Label-Lengths are both stored in 1 bytes, but
-// a pointer will start with two 1s so it would
-// be interpreted as longer than this length. That's how to
-// distinguish a label from a pointer when decoding the qname
-// TODO, implement pointers
-const MAX_LABEL_LEN = 63;
+// Pointers start with two 1 bits, and the pointer value is the
+// remaining 6 bits and the following byte.
+// Label-lengths are 1 byte and always start with two 0 bits,
+// so their max value is 0b00111111 == 63
+// If a byte &s this MASK, it is a pointer
+const POINTER_MASK = 0b11000000;
 
 const bytesToAscii = (bytes) => {
   let str = '';
@@ -18,14 +17,33 @@ module.exports = function decodeQname(bytes, offset) {
   let labels = [];
   let len;
   let originalOffset = offset;
+  let jumps = 0;
+  let maxJumps = 5;
+  let hasJumped = false;
+
   while ((len = bytes[offset]) !== 0) {
-    if (len > MAX_LABEL_LEN) {
-      throw new Error(`Unimplemented: encountered pointer`);
+    if (len & POINTER_MASK) {
+      let nextOffset =
+        ((bytes[offset] ^ POINTER_MASK) << 8) | bytes[offset + 1];
+      jumps += 1;
+      if (jumps > maxJumps) {
+        throw new Error(`Too many jumps: ${jumps} > ${maxJumps}`);
+      }
+      if (!hasJumped) {
+        hasJumped = true;
+      }
+      offset = nextOffset;
+    } else {
+      labels.push(bytesToAscii(bytes.slice(offset + 1, offset + 1 + len)));
+      offset += len + 1;
     }
-    labels.push(bytesToAscii(bytes.slice(offset + 1, offset + 1 + len)));
-    offset += len + 1;
   }
-  offset += 1;
-  let byteLength = offset - originalOffset;
+  let byteLength;
+  if (hasJumped) {
+    byteLength = 2; // the length of the first pointer
+  } else {
+    offset += 1; // to account for the final 0x00 byte
+    byteLength = offset - originalOffset;
+  }
   return [labels.join('.'), byteLength];
 };

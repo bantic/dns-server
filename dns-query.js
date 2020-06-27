@@ -23,7 +23,6 @@ module.exports = class DnsQuery {
    * @returns {string}
    */
   decodeQname() {
-    debugger;
     let [qname, byteLength] = decodeQname(this.bytes, this.offset);
     this.byteLength = byteLength + 4; // 2 bytes each for qtype and qclass
     this.offset += byteLength;

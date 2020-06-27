@@ -10,7 +10,7 @@ module.exports = class DnsRecord {
     this.offset = offset;
 
     let [qname, byteLength] = decodeQname(this.bytes, this.offset);
-    this.name = name;
+    this.name = qname;
     this.offset += byteLength;
   }
 
