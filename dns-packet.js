@@ -9,10 +9,42 @@ module.exports = class DnsPacket {
     this.bytes = bytes;
   }
 
+  toString() {
+    return [
+      '====== Header =====',
+      this.header.toString(),
+      '====== /Header ======',
+      '',
+      `====== ${this.queries.length} Queries ======`,
+      this.queries.map((query, i) => {
+        return [
+          '',
+          `====== Query ${i + 1} of ${this.queries.length} =====`,
+          this.queries[i].toString(),
+          `====== /Query ${i + 1} of ${this.queries.length} =====`,
+        ]
+          .map((s) => `\t${s}`)
+          .join('\n');
+      }),
+      '',
+      `===== ${this.records.length} Records =======`,
+      this.records.map((record, i) => {
+        return [
+          `====== Record ${i + 1} of ${this.records.length} =====`,
+          this.records[i].toString(),
+          `====== /Record ${i + 1} of ${this.records.length} =====`,
+        ]
+          .map((s) => `\t${s}`)
+          .join('\n');
+      }),
+    ].join('\n');
+  }
+
   /**
    * @returns {DnsHeader}
    */
   get header() {
+    debugger;
     return new DnsHeader(this.bytes.slice(0, DnsHeader.DNS_HEADER_BYTE_LEN));
   }
 

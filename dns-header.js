@@ -53,7 +53,7 @@ class DnsHeader {
   }
 
   get opcode() {
-    let code = (this.bytes[2] & 0b011110000) >> 4;
+    let code = (this.bytes[2] & 0b01111000) >> 4;
     assert.ok(code in OPCODES);
     return OPCODES[code];
   }

@@ -14,6 +14,10 @@ module.exports = class DnsRecord {
     this.offset += byteLength;
   }
 
+  toString() {
+    return `NAME "${this.name}" ${this.type} ${this.className}`;
+  }
+
   get type() {
     let code = (this.bytes[this.offset] << 8) | this.bytes[this.offset + 1];
     assert.ok(code in TYPES);
