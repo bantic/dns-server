@@ -1,5 +1,4 @@
 const assert = require('assert');
-const DNS_HEADER_BYTE_LEN = 12;
 
 const toHex = (num) => num.toString(16);
 
@@ -27,10 +26,12 @@ const QRS = {
 };
 
 class DnsHeader {
+  static DNS_HEADER_BYTE_LEN = 12;
+
   // array of bytes
   constructor(bytes) {
     this.bytes = bytes;
-    assert.strictEqual(this.bytes.length, DNS_HEADER_BYTE_LEN);
+    assert.strictEqual(this.bytes.length, DnsHeader.DNS_HEADER_BYTE_LEN);
   }
 
   toString() {
@@ -96,19 +97,19 @@ class DnsHeader {
   }
 
   get qdcount() {
-    return this.bytes[4] << 8 && this.bytes[5];
+    return (this.bytes[4] << 8) | this.bytes[5];
   }
 
   get ancount() {
-    return this.bytes[6] << 8 && this.bytes[7];
+    return (this.bytes[6] << 8) | this.bytes[7];
   }
 
   get nscount() {
-    return this.bytes[8] << 8 && this.bytes[9];
+    return (this.bytes[8] << 8) | this.bytes[9];
   }
 
   get arcount() {
-    return this.bytes[10] << 8 && this.bytes[11];
+    return (this.bytes[10] << 8) | this.bytes[11];
   }
 }
 
