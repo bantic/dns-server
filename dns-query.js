@@ -1,4 +1,6 @@
 const assert = require('assert');
+const decodeQname = require('./decode-qname');
+
 const QTYPES = {
   // TYPES
   1: 'A',
@@ -36,21 +38,6 @@ const QCLASSES = {
   255: '*', // Any
 };
 
-// The maximum label length is 63.
-// Pointers and Label-Lengths are both stored in 1 bytes, but
-// a pointer will start with two 1s so it would
-// be interpreted as longer than this length. That's how to
-// distinguish a label from a pointer when decoding the qname
-const MAX_LABEL_LEN = 63;
-
-const bytesToAscii = (bytes) => {
-  let str = '';
-  for (let byte of bytes) {
-    str += String.fromCharCode(byte);
-  }
-  return str;
-};
-
 module.exports = class DnsQuery {
   constructor(bytes, offset) {
     this.bytes = bytes;
@@ -58,27 +45,23 @@ module.exports = class DnsQuery {
     this.qname = this.decodeQname();
     this.qtype = this.getQtype();
     this.qclass = this.getQclass();
-    this.byteLength = this.offset + 4 - offset;
   }
 
   toString() {
     return `QNAME ${this.qname}, qtype ${this.qtype}, qclass ${this.qclass}`;
   }
 
+  /*
+   * Advances this.offset by the length of this qname field
+   * Sets this.byteLength
+   * @returns {string}
+   */
   decodeQname() {
-    let labels = [];
-    let len;
-    while ((len = this.bytes[this.offset]) !== 0) {
-      if (len > MAX_LABEL_LEN) {
-        throw new Error(`Unimplemented: encountered pointer`);
-      }
-      labels.push(
-        bytesToAscii(this.bytes.slice(this.offset + 1, this.offset + 1 + len))
-      );
-      this.offset += len + 1;
-    }
-    this.offset += 1;
-    return labels.join('.');
+    debugger;
+    let [qname, byteLength] = decodeQname(this.bytes, this.offset);
+    this.byteLength = byteLength + 4; // 2 bytes each for qtype and qclass
+    this.offset += byteLength;
+    return qname;
   }
 
   getQtype() {

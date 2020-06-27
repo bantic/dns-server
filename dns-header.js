@@ -1,5 +1,4 @@
 const assert = require('assert');
-
 const toHex = (num) => num.toString(16);
 
 // 0,1,2 or 3-15 (reserved)
