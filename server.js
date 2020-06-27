@@ -1,6 +1,6 @@
 const PORT = 2222;
 const udp = require('dgram');
-const DnsRequest = require('./dns-request');
+const DnsPacket = require('./dns-packet');
 
 // --------------------creating a udp server --------------------
 
@@ -24,7 +24,7 @@ server.on('message', function (msg, info) {
     info.port
   );
 
-  let request = new DnsRequest(msg);
+  let request = new DnsPacket(msg);
   console.log('DSN Info:', request.header.toString());
   for (let i = 0; i < request.queries.length; i++) {
     console.log(`Query #${i + 1}: `, request.queries[i].toString());
