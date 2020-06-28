@@ -18,10 +18,14 @@ module.exports = function decodeQname(bytes, offset) {
   let len;
   let originalOffset = offset;
   let jumps = 0;
-  let maxJumps = 5;
+  let maxJumps = 127;
   let hasJumped = false;
 
   while ((len = bytes[offset]) !== 0) {
+    if (offset >= bytes.length) {
+      throw new Error(`Incorrect label length`);
+    }
+
     if (len & POINTER_MASK) {
       let nextOffset =
         ((bytes[offset] ^ POINTER_MASK) << 8) | bytes[offset + 1];

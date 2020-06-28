@@ -18,6 +18,57 @@ response packet:
 
 - `nc -u 8.8.8.8 53 < query_packet.txt > response_packet.txt`. Give it a moment, then cancel the process. The response will be in `response_packet.txt`
 
+## Running/Testing Locally
+
+Confirm that the sample packets can be decoded:
+
+```
+$ node debug-packet query_packet.txt
+====== Header =====
+id 56802 (0xdde2), qr QUERY, opcode "QUERY"
+aa 0, tc 0, rd 1, ra 0, z 0, AD 1, CD 0, rcode "No error"
+qdcount 1, ancount 0, nscount 0, arcount 0
+====== /Header ======
+
+====== 1 Queries ======
+
+        ====== Query 1 of 1 =====
+        QNAME google.com, qtype A, qclass IN
+        ====== /Query 1 of 1 =====
+
+===== 0 Records =======
+
+$ node debug-packet response_packet.txt
+====== Header =====
+id 56802 (0xdde2), qr QUERY, opcode "QUERY"
+aa 0, tc 0, rd 1, ra 1, z 0, AD 0, CD 0, rcode "No error"
+qdcount 1, ancount 1, nscount 0, arcount 0
+====== /Header ======
+
+====== 1 Queries ======
+
+        ====== Query 1 of 1 =====
+        QNAME google.com, qtype A, qclass IN
+        ====== /Query 1 of 1 =====
+
+===== 1 Records =======
+        ====== Record 1 of 1 =====
+        NAME "google.com" A IN 299
+RDATA: {"domain":"google.com","host":"172.217.10.142"}
+        ====== /Record 1 of 1 =====
+```
+
+Or try running the server and sending it a request via dig:
+
+```
+$ node server.js
+
+// Separate terminal
+$ dig @localhost -p 2222 +noedns recurse.com
+
+// Server should print out the decoded query packet
+```
+
 ## More Info
 
 some useful links:

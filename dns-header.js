@@ -1,5 +1,5 @@
 const assert = require('assert');
-const toHex = (num) => num.toString(16);
+const toHex = (num) => `0x${num.toString(16)}`;
 
 // 0,1,2 or 3-15 (reserved)
 const OPCODES = {

@@ -25,7 +25,7 @@ server.on('message', function (msg, info) {
   );
 
   let request = new DnsPacket(msg);
-  console.log('DSN Info:', request.header.toString());
+  console.log('DNS Info:', request.header.toString());
   for (let i = 0; i < request.queries.length; i++) {
     console.log(`Query #${i + 1}: `, request.queries[i].toString());
   }
