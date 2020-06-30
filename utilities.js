@@ -7,8 +7,13 @@ function formatIPv4(u32) {
     .join('.');
 }
 
+function uint16ToBytesBE(int) {
+  return [(int & 0b1111111100000000) >> 8, int & 0b0000000011111111];
+}
+
 assert.strictEqual(formatIPv4(3221226219), '192.0.2.235');
 
 module.exports = {
   formatIPv4,
+  uint16ToBytesBE,
 };

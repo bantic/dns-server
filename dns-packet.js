@@ -1,10 +1,23 @@
+const assert = require('assert');
 const DnsHeader = require('./dns-header');
 const DnsQuery = require('./dns-query');
 const DnsRecord = require('./dns-record');
 
 const sum = (arr) => arr.reduce((acc, v) => acc + v, 0);
 
-module.exports = class DnsPacket {
+class DnsPacket {
+  static create({ header, queries, records }) {
+    debugger;
+    let bytes = header.bytes;
+    for (let query of queries) {
+      bytes = [...bytes, ...query.bytes];
+    }
+    for (let record of records) {
+      bytes = [...bytes, ...record.bytes];
+    }
+    return new DnsPacket(bytes);
+  }
+
   constructor(bytes) {
     this.bytes = bytes;
   }
@@ -77,4 +90,46 @@ module.exports = class DnsPacket {
     }
     return records;
   }
-};
+}
+
+// TEST
+let packet = DnsPacket.create({
+  header: DnsHeader.create({
+    id: 1,
+    qr: 'QUERY',
+    opcode: 'QUERY',
+    aa: false,
+    tc: false,
+    rd: false,
+    ra: false,
+    z: 0,
+    ad: false,
+    cd: false,
+    rcode: 'No error',
+    qdcount: 1,
+    ancount: 0,
+    nscount: 0,
+    arcount: 0,
+  }),
+  queries: [
+    DnsQuery.create({
+      qname: 'www.recurse.com',
+      qtype: 'A',
+      qclass: 'IN',
+    }),
+  ],
+  records: [],
+});
+
+assert.strictEqual(packet.header.id, 1);
+assert.strictEqual(packet.header.qr, 'QUERY');
+assert.strictEqual(packet.header.opcode, 'QUERY');
+assert.strictEqual(packet.header.rd, 0);
+assert.strictEqual(packet.header.qdcount, 1);
+assert.strictEqual(packet.header.rcode, 'No error');
+assert.strictEqual(packet.queries.length, 1);
+assert.strictEqual(packet.queries[0].qname, 'www.recurse.com');
+assert.strictEqual(packet.queries[0].qtype, 'A');
+assert.strictEqual(packet.queries[0].qclass, 'IN');
+
+module.exports = DnsPacket;

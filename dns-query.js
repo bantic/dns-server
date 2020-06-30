@@ -1,10 +1,35 @@
 const assert = require('assert');
 const decodeQname = require('./decode-qname');
+const encodeQname = require('./encode-qname');
 
 const QTYPES = require('./data').QTYPES;
 const QCLASSES = require('./data').QCLASSES;
+const { uint16ToBytesBE } = require('./utilities');
 
-module.exports = class DnsQuery {
+// 2-byte unsigned int...return 2 bytes
+// TODO: create intTo2Bytes function
+function encodeQtype(qtype) {
+  assert.ok(Object.values(QTYPES).includes(qtype));
+  let code = Object.entries(QTYPES).find(([k, v]) => v === qtype)[0];
+  return uint16ToBytesBE(code);
+}
+
+function encodeQclass(qclass) {
+  assert.ok(Object.values(QCLASSES).includes(qclass));
+  let code = Object.entries(QCLASSES).find(([k, v]) => v === qclass)[0];
+  return uint16ToBytesBE(code);
+}
+
+class DnsQuery {
+  static create({ qname, qtype, qclass }) {
+    let bytes = Buffer.from([
+      ...encodeQname(qname),
+      ...encodeQtype(qtype),
+      ...encodeQclass(qclass),
+    ]);
+    return new DnsQuery(bytes, 0);
+  }
+
   constructor(bytes, offset) {
     this.bytes = bytes;
     this.offset = offset;
@@ -31,7 +56,7 @@ module.exports = class DnsQuery {
 
   getQtype() {
     let code = (this.bytes[this.offset] << 8) | this.bytes[this.offset + 1];
-    assert.ok(code in QTYPES);
+    assert.ok(code in QTYPES, `${code} in QTYPES`);
     return QTYPES[code];
   }
 
@@ -40,4 +65,17 @@ module.exports = class DnsQuery {
     assert.ok(code in QCLASSES);
     return QCLASSES[code];
   }
-};
+}
+
+// Test
+let query = DnsQuery.create({
+  qname: 'www.recurse.com',
+  qtype: 'A',
+  qclass: 'IN',
+});
+
+assert.strictEqual(query.qname, 'www.recurse.com');
+assert.strictEqual(query.qtype, 'A');
+assert.strictEqual(query.qclass, 'IN');
+
+module.exports = DnsQuery;

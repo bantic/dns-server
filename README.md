@@ -78,3 +78,8 @@ some useful links:
 - the first DNS RFC, section 4.1 describes the bytes https://tools.ietf.org/html/rfc1035
 - wireshark: https://jvns.ca/blog/2018/06/19/what-i-use-wireshark-for/
 - how updating DNS works: https://jvns.ca/blog/how-updating-dns-works/
+
+### TODOs
+
+- Ensure that sending a hardcoded Dns query packet to a known resolver (e.g., 8.8.8.8) is understood and returns a valid response
+- Add decoding for more data types (only "A" type is currently decoded)
