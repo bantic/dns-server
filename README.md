@@ -82,4 +82,9 @@ some useful links:
 ### TODOs
 
 - Ensure that sending a hardcoded Dns query packet to a known resolver (e.g., 8.8.8.8) is understood and returns a valid response
+
+^ Working on this. Not getting any response. It seems like the packet is wrong.
+I tried sending the "query_packet.txt" packet (by hardcoding its bytes into the debug-send-query.js script) and it _does_
+get a response. See TODO notes in debug-send-query about what to fix.
+
 - Add decoding for more data types (only "A" type is currently decoded)

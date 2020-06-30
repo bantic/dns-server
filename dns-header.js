@@ -245,5 +245,6 @@ assert.strictEqual(header.opcode, 'QUERY');
 assert.strictEqual(header.qr, 'QUERY');
 assert.strictEqual(header.rcode, 'No error');
 assert.strictEqual(header.ad, 0);
+console.log(header.bytes);
 
 module.exports = DnsHeader;

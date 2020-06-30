@@ -7,7 +7,6 @@ const sum = (arr) => arr.reduce((acc, v) => acc + v, 0);
 
 class DnsPacket {
   static create({ header, queries, records }) {
-    debugger;
     let bytes = header.bytes;
     for (let query of queries) {
       bytes = [...bytes, ...query.bytes];
@@ -15,7 +14,7 @@ class DnsPacket {
     for (let record of records) {
       bytes = [...bytes, ...record.bytes];
     }
-    return new DnsPacket(bytes);
+    return new DnsPacket(Buffer.from(bytes));
   }
 
   constructor(bytes) {
@@ -131,5 +130,7 @@ assert.strictEqual(packet.queries.length, 1);
 assert.strictEqual(packet.queries[0].qname, 'www.recurse.com');
 assert.strictEqual(packet.queries[0].qtype, 'A');
 assert.strictEqual(packet.queries[0].qclass, 'IN');
+
+console.log(packet.bytes);
 
 module.exports = DnsPacket;
