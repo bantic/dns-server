@@ -56,79 +56,93 @@ class DnsPacket {
    * @returns {DnsHeader}
    */
   get header() {
-    return new DnsHeader(this.bytes.slice(0, DnsHeader.DNS_HEADER_BYTE_LEN));
+    if (!this._header) {
+      this._header = new DnsHeader(
+        this.bytes.slice(0, DnsHeader.DNS_HEADER_BYTE_LEN)
+      );
+    }
+    return this._header;
   }
 
   /**
    * @returns {DnsQuery[]}
    */
   get queries() {
-    let queries = [];
-    let offset = DnsHeader.DNS_HEADER_BYTE_LEN;
-    for (let i = 0; i < this.header.qdcount; i++) {
-      let query = new DnsQuery(this.bytes, offset);
-      queries.push(query);
-      offset += query.byteLength;
+    if (!this._queries) {
+      let queries = [];
+      let offset = DnsHeader.DNS_HEADER_BYTE_LEN;
+      for (let i = 0; i < this.header.qdcount; i++) {
+        let query = new DnsQuery(this.bytes, offset);
+        queries.push(query);
+        offset += query.byteLength;
+      }
+      this._queries = queries;
     }
-    return queries;
+    return this._queries;
   }
 
   /**
    * @returns {DnsRecord[]}
    */
   get records() {
-    let records = [];
-    let offset =
-      DnsHeader.DNS_HEADER_BYTE_LEN +
-      sum(this.queries.map((query) => query.byteLength));
+    if (!this._records) {
+      let records = [];
+      let offset =
+        DnsHeader.DNS_HEADER_BYTE_LEN +
+        sum(this.queries.map((query) => query.byteLength));
 
-    for (let i = 0; i < this.header.ancount; i++) {
-      let record = new DnsRecord(this.bytes, offset);
-      records.push(record);
-      offset += record.byteLength;
+      for (let i = 0; i < this.header.ancount; i++) {
+        let record = new DnsRecord(this.bytes, offset);
+        records.push(record);
+        offset += record.byteLength;
+      }
+      this._records = records;
     }
-    return records;
+    return this._records;
   }
 }
 
 // TEST
-let packet = DnsPacket.create({
-  header: DnsHeader.create({
-    id: 1,
-    qr: 'QUERY',
-    opcode: 'QUERY',
-    aa: false,
-    tc: false,
-    rd: false,
-    ra: false,
-    z: 0,
-    ad: false,
-    cd: false,
-    rcode: 'No error',
-    qdcount: 1,
-    ancount: 0,
-    nscount: 0,
-    arcount: 0,
-  }),
-  queries: [
-    DnsQuery.create({
-      qname: 'www.recurse.com',
-      qtype: 'A',
-      qclass: 'IN',
+const TESTING = true;
+if (TESTING) {
+  let packet = DnsPacket.create({
+    header: DnsHeader.create({
+      id: 1,
+      qr: 'QUERY',
+      opcode: 'QUERY',
+      aa: false,
+      tc: false,
+      rd: false,
+      ra: false,
+      z: 0,
+      ad: false,
+      cd: false,
+      rcode: 'No error',
+      qdcount: 1,
+      ancount: 0,
+      nscount: 0,
+      arcount: 0,
     }),
-  ],
-  records: [],
-});
+    queries: [
+      DnsQuery.create({
+        qname: 'www.recurse.com',
+        qtype: 'A',
+        qclass: 'IN',
+      }),
+    ],
+    records: [],
+  });
 
-assert.strictEqual(packet.header.id, 1);
-assert.strictEqual(packet.header.qr, 'QUERY');
-assert.strictEqual(packet.header.opcode, 'QUERY');
-assert.strictEqual(packet.header.rd, 0);
-assert.strictEqual(packet.header.qdcount, 1);
-assert.strictEqual(packet.header.rcode, 'No error');
-assert.strictEqual(packet.queries.length, 1);
-assert.strictEqual(packet.queries[0].qname, 'www.recurse.com');
-assert.strictEqual(packet.queries[0].qtype, 'A');
-assert.strictEqual(packet.queries[0].qclass, 'IN');
+  assert.strictEqual(packet.header.id, 1);
+  assert.strictEqual(packet.header.qr, 'QUERY');
+  assert.strictEqual(packet.header.opcode, 'QUERY');
+  assert.strictEqual(packet.header.rd, 0);
+  assert.strictEqual(packet.header.qdcount, 1);
+  assert.strictEqual(packet.header.rcode, 'No error');
+  assert.strictEqual(packet.queries.length, 1);
+  assert.strictEqual(packet.queries[0].qname, 'www.recurse.com');
+  assert.strictEqual(packet.queries[0].qtype, 'A');
+  assert.strictEqual(packet.queries[0].qclass, 'IN');
+}
 
 module.exports = DnsPacket;

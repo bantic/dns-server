@@ -6,14 +6,20 @@ const { formatIPv4 } = require('./utilities');
 const TYPES = require('./data').TYPES;
 const CLASSES = require('./data').CLASSES;
 
+// 10 bytes for all the non-dynamic parts of the record
+// (2 for type, 2 for class, 4 for ttl, 2 for rdlength)
+const RECORD_FIXED_BYTE_SIZE = 10;
+
 module.exports = class DnsRecord {
   constructor(bytes, offset) {
     this.bytes = bytes;
     this.offset = offset;
+    this.byteLength = RECORD_FIXED_BYTE_SIZE;
 
     let [qname, byteLength] = decodeQname(this.bytes, this.offset);
     this.name = qname;
     this.offset += byteLength;
+    this.byteLength = byteLength + RECORD_FIXED_BYTE_SIZE + this.rdlength;
   }
 
   toString() {
@@ -44,9 +50,7 @@ module.exports = class DnsRecord {
   }
 
   get rdata() {
-    return decodeRdata({
-      record: this,
-    });
+    return decodeRdata({ record: this });
   }
 
   get formattedData() {
@@ -56,6 +60,8 @@ module.exports = class DnsRecord {
         domain: this.name,
         host: formatIPv4(data.address),
       };
+    } else {
+      return data;
     }
   }
 };
