@@ -79,12 +79,19 @@ some useful links:
 - wireshark: https://jvns.ca/blog/2018/06/19/what-i-use-wireshark-for/
 - how updating DNS works: https://jvns.ca/blog/how-updating-dns-works/
 
+### Files
+
+- samples/\* -- sample binary packets to use for debugging
+
 ### TODOs
 
-- Ensure that sending a hardcoded Dns query packet to a known resolver (e.g., 8.8.8.8) is understood and returns a valid response
-
-^ Working on this. Not getting any response. It seems like the packet is wrong.
-I tried sending the "query_packet.txt" packet (by hardcoding its bytes into the debug-send-query.js script) and it _does_
-get a response. See TODO notes in debug-send-query about what to fix.
-
+- Figure out what goes wrong when decoding the sample packet
 - Add decoding for more data types (only "A" type is currently decoded)
+
+### Done TODOS
+
+- Ensure that sending a hardcoded Dns query packet to a known resolver (e.g., 8.8.8.8) is understood and returns a valid response
+  ^ Working on this. Not getting any response. It seems like the packet is wrong.
+  I tried sending the "query*packet.txt" packet (by hardcoding its bytes into the debug-send-query.js script) and it \_does*
+  get a response. See TODO notes in debug-send-query about what to fix.
+  The solution was to fix an error in the `toByte` function.
