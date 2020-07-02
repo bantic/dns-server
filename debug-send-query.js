@@ -2,6 +2,7 @@ const DnsPacket = require('./dns-packet');
 const DnsHeader = require('./dns-header');
 const DnsQuery = require('./dns-query');
 const udp = require('dgram');
+const fs = require('fs');
 
 let packet = DnsPacket.create({
   header: DnsHeader.create({
@@ -41,6 +42,9 @@ client.on('message', (msg, info) => {
   console.log('Received data from client: ' + msg.toString());
   console.log('Message:', msg);
   console.log('From: ', info.address, info.port);
+  let packetFile = `packet-${Math.floor(Math.random() * 1000)}.txt`;
+  fs.writeFileSync(packetFile, msg);
+  console.log('wrote file: ', packetFile);
 });
 
 client.on('error', (err) => {
@@ -58,8 +62,10 @@ client.on('listening', () => {
 // but we don't get a response back when we send "packet.bytes"
 // It looks like the packet.bytes are wrong at the 3rd byte...it should be "0x20" but it
 // is "0x80" for some reason. Need to figure out why
-// TODO figure out what is wrong with our encoding of the header
-let bytes = Buffer.from([
+// Done: TODO figure out what is wrong with our encoding of the header
+// The issue was that the `toByte` method was receiving things like "0" that it
+// incorrectly interpreted as an "on" bit
+let fakeBytes = Buffer.from([
   0xdd,
   0xe2,
   0x01,
@@ -89,6 +95,9 @@ let bytes = Buffer.from([
   0x00,
   0x01,
 ]);
+const USE_FAKE_BYTES = false;
+let bytes = USE_FAKE_BYTES ? fakeBytes : packet.bytes;
+// client.send(bytes, port, server, (err) => {
 client.send(bytes, port, server, (err) => {
   if (err) {
     console.log('Got error', err);

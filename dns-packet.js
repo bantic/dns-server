@@ -131,6 +131,4 @@ assert.strictEqual(packet.queries[0].qname, 'www.recurse.com');
 assert.strictEqual(packet.queries[0].qtype, 'A');
 assert.strictEqual(packet.queries[0].qclass, 'IN');
 
-console.log(packet.bytes);
-
 module.exports = DnsPacket;

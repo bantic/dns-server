@@ -57,12 +57,15 @@ const to4Bits = (u4) => {
 
 const toByte = (bits) => {
   assert.strictEqual(bits.length, 8);
+  // Ensure truthy value "0" is interpreted as "off"
+  const toBit = (bit) => (bit === 0 || bit === '0' || bit === false ? 0 : 1);
   return bits.reduce((acc, bit, idx) => {
-    acc += bit ? 2 ** (8 - idx - 1) : 0;
+    acc += toBit(bit) ? 2 ** (8 - idx - 1) : 0;
     return acc;
   }, 0);
 };
 
+assert.strictEqual(toByte(['0', 0, 0, 0, 0, 0, 0, 1]), 1);
 assert.strictEqual(toByte([0, 0, 0, 0, 0, 0, 0, 1]), 1);
 assert.strictEqual(toByte([0, 0, 0, 0, 0, 0, 1, 0]), 2);
 assert.strictEqual(toByte([1, 0, 0, 0, 0, 0, 1, 0]), 130);
@@ -221,30 +224,32 @@ class DnsHeader {
 }
 
 // TEST
-let header = DnsHeader.create({
-  id: 1,
-  qr: 'QUERY',
-  opcode: 'QUERY',
-  aa: false,
-  tc: false,
-  rd: false,
-  ra: false,
-  z: 0,
-  ad: false,
-  cd: false,
-  rcode: 'No error',
-  qdcount: 1,
-  ancount: 0,
-  nscount: 0,
-  arcount: 0,
-});
+const TESTING = true;
+if (TESTING) {
+  let header = DnsHeader.create({
+    id: 1,
+    qr: 'QUERY',
+    opcode: 'QUERY',
+    aa: false,
+    tc: false,
+    rd: false,
+    ra: false,
+    z: 0,
+    ad: false,
+    cd: false,
+    rcode: 'No error',
+    qdcount: 1,
+    ancount: 0,
+    nscount: 0,
+    arcount: 0,
+  });
 
-assert.strictEqual(header.id, 1);
-assert.strictEqual(header.qdcount, 1);
-assert.strictEqual(header.opcode, 'QUERY');
-assert.strictEqual(header.qr, 'QUERY');
-assert.strictEqual(header.rcode, 'No error');
-assert.strictEqual(header.ad, 0);
-console.log(header.bytes);
+  assert.strictEqual(header.id, 1);
+  assert.strictEqual(header.qdcount, 1);
+  assert.strictEqual(header.opcode, 'QUERY');
+  assert.strictEqual(header.qr, 'QUERY');
+  assert.strictEqual(header.rcode, 'No error');
+  assert.strictEqual(header.ad, 0);
+}
 
 module.exports = DnsHeader;
