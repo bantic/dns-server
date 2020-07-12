@@ -1,8 +1,7 @@
 const PORT = 2222;
 const udp = require('dgram');
 const DnsPacket = require('./dns-packet');
-
-// --------------------creating a udp server --------------------
+const lookup = require('./lookup');
 
 // creating a udp server
 var server = udp.createSocket('udp4');
@@ -30,14 +29,25 @@ server.on('message', function (msg, info) {
     console.log(`Query #${i + 1}: `, request.queries[i].toString());
   }
 
-  //sending msg
-  server.send(msg, info.port, 'localhost', function (error) {
-    if (error) {
-      client.close();
-    } else {
-      console.log('Data sent !!!');
-    }
-  });
+  if (request.queries.length > 0) {
+    let query = request.queries[0];
+    let qname = query.qname;
+    let qtype = query.qtype;
+
+    console.log(`Looking up ${qname} ${qtype} ID: ${request.header.id}`);
+    lookup(qname, qtype, { id: request.header.id }, (result) => {
+      console.log('Server Got result from lookup');
+      //sending msg
+      server.send(result.bytes, info.port, info.address, function (error) {
+        if (error) {
+          console.log('ERROR in response:', error);
+          client.close();
+        } else {
+          console.log('Data sent BACK !!!');
+        }
+      });
+    });
+  }
 });
 
 //emits when socket is ready and listening for datagram msgs

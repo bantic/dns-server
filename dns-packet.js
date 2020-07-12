@@ -17,6 +17,36 @@ class DnsPacket {
     return new DnsPacket(Buffer.from(bytes));
   }
 
+  static createWithQname(qname, qtype, id = 1) {
+    return DnsPacket.create({
+      header: DnsHeader.create({
+        id,
+        qr: 'QUERY',
+        opcode: 'QUERY',
+        aa: false,
+        tc: false,
+        rd: true,
+        ra: false,
+        z: 0,
+        ad: false,
+        cd: false,
+        rcode: 'No error',
+        qdcount: 1,
+        ancount: 0,
+        nscount: 0,
+        arcount: 0,
+      }),
+      queries: [
+        DnsQuery.create({
+          qname,
+          qtype,
+          qclass: 'IN',
+        }),
+      ],
+      records: [],
+    });
+  }
+
   constructor(bytes) {
     this.bytes = bytes;
   }

@@ -66,7 +66,10 @@ $ node server.js
 // Separate terminal
 $ dig @localhost -p 2222 +noedns recurse.com
 
-// Server should print out the decoded query packet
+// The server will print out the decoded query packet as well as the
+// response, and it will send the response back, which will...
+
+// In the dig terminal, you should see a valid response to your query
 ```
 
 ## More Info
@@ -81,15 +84,19 @@ some useful links:
 
 ### Files
 
-- samples/\* -- sample binary packets to use for debugging
+- samples/\* -- sample binary packets to use for debugging.
+  Pass these as command-line arguments to debug-packet.js
 
 ### TODOs
 
-- Figure out what goes wrong when decoding the sample packet
-- Add decoding for more data types (only "A" type is currently decoded)
+- Implement a recursive lookup that starts from the root servers
+- Add decoding for more data types (only "A", "CNAME" types currently decoded)
+- Remove the client.js -- it's not used (right?)
 
 ### Done TODOS
 
+- Created a server that can handle requests via dig, use Google Public DNS, and return the response
+- Added decoding for CNAME rdata type
 - Ensure that sending a hardcoded Dns query packet to a known resolver (e.g., 8.8.8.8) is understood and returns a valid response
   ^ Working on this. Not getting any response. It seems like the packet is wrong.
   I tried sending the "query*packet.txt" packet (by hardcoding its bytes into the debug-send-query.js script) and it \_does*
