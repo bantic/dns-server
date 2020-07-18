@@ -15,6 +15,7 @@ const TYPES = {
   14: 'MINFO',
   15: 'MX',
   16: 'TXT',
+  28: 'AAAA',
 };
 const QTYPES = {
   ...TYPES,

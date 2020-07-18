@@ -60,6 +60,11 @@ module.exports = class DnsRecord {
         domain: this.name,
         host: formatIPv4(data.address),
       };
+    } else if (this.type === 'NS') {
+      return {
+        domain: this.name,
+        host: data.host,
+      };
     } else {
       return data;
     }

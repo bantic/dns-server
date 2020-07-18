@@ -86,10 +86,10 @@ some useful links:
 
 - samples/\* -- sample binary packets to use for debugging.
   Pass these as command-line arguments to debug-packet.js
+  - `samples/sample-packet-198-41-0-4` -- a response from one of the root nameservers for a query (lots of authorities and resources in the response)
 
 ### TODOs
 
-- Implement a recursive lookup that starts from the root servers
 - Add decoding for more data types (only "A", "CNAME" types currently decoded)
 - Remove the client.js -- it's not used (right?)
 
@@ -97,6 +97,11 @@ some useful links:
 
 ### Done TODOS
 
+- 7/18/20 Implement a recursive lookup that starts from the root servers
+  - The recursive lookup doesn't seem to work properly. To pick this back up, start the server in one terminal and try dig-ing at it from another. Need to look
+    more carefully at the get-resolved-ns and get-unresolved-ns -- it seems to not be able to follow the referral to the 'com' nameservers... Maybe the issue is the way we are using the 'endswith' to compare the qname...add a breakpoint here to check
+  - Yes ^ this turned out to be the issue. There were a few issues where the rdata wasn't referenced properly, or I forgot that the nameservers were distilled to `{domain, host}` objects, etc. Recursive lookup should be working now!
+- 7/18/20 Add support for 'AAAA' record type
 - 7/18/20 Add `answers`,`authorities`,`resources`
   - I misunderstood the format originally and thought there was just a set of "records" after the queries.
     Turns out there are `ancount` "answer" records, `nscount` "authority" (nameserver) records, and `arcount` "resources" records

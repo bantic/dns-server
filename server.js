@@ -1,7 +1,7 @@
 const PORT = 2222;
 const udp = require('dgram');
 const DnsPacket = require('./dns-packet');
-const lookup = require('./lookup');
+const { lookup, recursiveLookup } = require('./lookup');
 
 // creating a udp server
 var server = udp.createSocket('udp4');
@@ -13,7 +13,7 @@ server.on('error', function (error) {
 });
 
 // emits on new datagram msg
-server.on('message', function (msg, info) {
+server.on('message', async function (msg, info) {
   console.log('Data received from client : ' + msg.toString());
   console.log(msg);
   console.log(
@@ -35,17 +35,16 @@ server.on('message', function (msg, info) {
     let qtype = query.qtype;
 
     console.log(`Looking up ${qname} ${qtype} ID: ${request.header.id}`);
-    lookup(qname, qtype, { id: request.header.id }, (result) => {
-      console.log('Server Got result from lookup');
-      //sending msg
-      server.send(result.bytes, info.port, info.address, function (error) {
-        if (error) {
-          console.log('ERROR in response:', error);
-          client.close();
-        } else {
-          console.log('Data sent BACK !!!');
-        }
-      });
+    let result = await recursiveLookup(qname, qtype, request.header.id);
+    console.log('Server Got result from lookup');
+    //sending msg
+    server.send(result.bytes, info.port, info.address, function (error) {
+      if (error) {
+        console.log('ERROR in response:', error);
+        client.close();
+      } else {
+        console.log('Data sent BACK !!!');
+      }
     });
   }
 });

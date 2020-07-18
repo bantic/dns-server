@@ -2,6 +2,7 @@ const assert = require('assert');
 const DnsHeader = require('./dns-header');
 const DnsQuery = require('./dns-query');
 const DnsRecord = require('./dns-record');
+const { formatIPv4 } = require('./utilities');
 
 const sum = (arr) => arr.reduce((acc, v) => acc + v, 0);
 
@@ -181,6 +182,54 @@ class DnsPacket {
       this._resources = resources;
     }
     return this._resources;
+  }
+
+  getRandomARecord() {
+    let aRecords = this.answers.filter((record) => record.type === 'A');
+    return aRecords[Math.floor(Math.random() * aRecords.length)];
+  }
+
+  /**
+   * @param {String} qname
+   * @returns array of objects with `domain`, `host` keys
+   */
+  getNameservers(qname) {
+    let nameservers = this.authorities.filter((record) => record.type === 'NS');
+    return nameservers
+      .map((ns) => {
+        return {
+          domain: ns.rdata.domain,
+          host: ns.rdata.host,
+        };
+      })
+      .filter(({ domain, host }) => {
+        return qname.endsWith(domain);
+      });
+  }
+
+  /**
+   * Finds the ip address for the nameserver that corresponds to the qname.
+   * Not guaranteed to find one.
+   * @returns {String|null}
+   */
+  getResolvedNameserver(qname) {
+    let nameservers = this.getNameservers(qname);
+    let aRecords = this.resources.filter((record) => record.type === 'A');
+    for (let ns of nameservers) {
+      let aRecord = aRecords.find((r) => r.rdata.domain === ns.host);
+      if (aRecord) {
+        return formatIPv4(aRecord.rdata.address);
+      }
+    }
+  }
+
+  getUnresolvedNameserver(qname) {
+    let nameservers = this.getNameservers(qname);
+    if (nameservers.length) {
+      return nameservers[0].host;
+    }
+
+    throw new Error(`Expected to find an unresolved ns for ${qname}`);
   }
 }
 
