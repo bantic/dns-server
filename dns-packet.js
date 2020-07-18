@@ -52,6 +52,22 @@ class DnsPacket {
   }
 
   toString() {
+    let tab = '    ';
+    let logRecords = (type) => {
+      let len = this[type].length;
+      return [
+        `=== ${len} ${type} ===`,
+        this[type]
+          .map((record, i) => {
+            return [
+              `${tab}=== ${i + 1} of ${len} (${type}) ===`,
+              record.toString(),
+            ].join('\n');
+          })
+          .join('\n'),
+      ].join('\n');
+    };
+
     return [
       '====== Header =====',
       this.header.toString(),
@@ -61,24 +77,17 @@ class DnsPacket {
       this.queries.map((query, i) => {
         return [
           '',
-          `====== Query ${i + 1} of ${this.queries.length} =====`,
-          this.queries[i].toString(),
-          `====== /Query ${i + 1} of ${this.queries.length} =====`,
-        ]
-          .map((s) => `\t${s}`)
-          .join('\n');
+          `${tab}====== Query ${i + 1} of ${this.queries.length} =====`,
+          `${tab}${this.queries[i].toString()}`,
+          `${tab}====== /Query ${i + 1} of ${this.queries.length} =====`,
+        ].join('\n');
       }),
       '',
-      `===== ${this.records.length} Records =======`,
-      this.records.map((record, i) => {
-        return [
-          `====== Record ${i + 1} of ${this.records.length} =====`,
-          this.records[i].toString(),
-          `====== /Record ${i + 1} of ${this.records.length} =====`,
-        ]
-          .map((s) => `\t${s}`)
-          .join('\n');
-      }),
+      logRecords('answers'),
+      '',
+      logRecords('authorities'),
+      '',
+      logRecords('resources'),
     ].join('\n');
   }
 
@@ -114,21 +123,64 @@ class DnsPacket {
   /**
    * @returns {DnsRecord[]}
    */
-  get records() {
-    if (!this._records) {
-      let records = [];
+  get answers() {
+    if (!this._answers) {
+      let answers = [];
       let offset =
         DnsHeader.DNS_HEADER_BYTE_LEN +
         sum(this.queries.map((query) => query.byteLength));
 
       for (let i = 0; i < this.header.ancount; i++) {
         let record = new DnsRecord(this.bytes, offset);
-        records.push(record);
+        answers.push(record);
         offset += record.byteLength;
       }
-      this._records = records;
+      this._answers = answers;
     }
-    return this._records;
+    return this._answers;
+  }
+
+  /**
+   * @returns {DnsRecord[]}
+   */
+  get authorities() {
+    if (!this._authorities) {
+      let authorities = [];
+      let offset =
+        DnsHeader.DNS_HEADER_BYTE_LEN +
+        sum(this.queries.map((q) => q.byteLength)) +
+        sum(this.answers.map((a) => a.byteLength));
+
+      for (let i = 0; i < this.header.nscount; i++) {
+        let record = new DnsRecord(this.bytes, offset);
+        authorities.push(record);
+        offset += record.byteLength;
+      }
+      this._authorities = authorities;
+    }
+    return this._authorities;
+  }
+
+  /**
+   * @returns {DnsRecord[]}
+   */
+  get resources() {
+    if (!this._resources) {
+      let resources = [];
+      let offset =
+        DnsHeader.DNS_HEADER_BYTE_LEN +
+        sum(this.queries.map((q) => q.byteLength)) +
+        sum(this.answers.map((a) => a.byteLength)) +
+        sum(this.authorities.map((a) => a.byteLength));
+
+      for (let i = 0; i < this.header.arcount; i++) {
+        let record = new DnsRecord(this.bytes, offset);
+        resources.push(record);
+        offset += record.byteLength;
+      }
+      this._resources = resources;
+    }
+    return this._resources;
   }
 }
 

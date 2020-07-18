@@ -93,8 +93,13 @@ some useful links:
 - Add decoding for more data types (only "A", "CNAME" types currently decoded)
 - Remove the client.js -- it's not used (right?)
 
+### In progress TODOS
+
 ### Done TODOS
 
+- 7/18/20 Add `answers`,`authorities`,`resources`
+  - I misunderstood the format originally and thought there was just a set of "records" after the queries.
+    Turns out there are `ancount` "answer" records, `nscount` "authority" (nameserver) records, and `arcount` "resources" records
 - Created a server that can handle requests via dig, use Google Public DNS, and return the response
 - Added decoding for CNAME rdata type
 - Ensure that sending a hardcoded Dns query packet to a known resolver (e.g., 8.8.8.8) is understood and returns a valid response
