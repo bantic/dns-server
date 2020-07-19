@@ -90,8 +90,12 @@ some useful links:
 
 ### TODOs
 
-- Add decoding for more data types (only "A", "CNAME" types currently decoded)
+- Add decoding for more data types (only "A", "CNAME", "NS", "AAAA" types currently decoded)
 - Remove the client.js -- it's not used (right?)
+- Clean up the logging statements
+- Add a few tests
+- Document/create more DnsPacket binary files for testing
+- Add caching, so it can act more like a real resolver?
 
 ### In progress TODOS
 
